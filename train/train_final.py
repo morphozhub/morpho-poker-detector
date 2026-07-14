@@ -88,15 +88,25 @@ def train_net(tokens, y, tr, va, seed, device, epochs=50, patience=8, bs=24):
     return model, best_ap
 
 
-def main():
+def build_artifacts(out_dir=ART, exclude_dates=()):
+    """Train the full production bundle into out_dir.
+
+    exclude_dates: release dates dropped entirely (used by the autopilot to
+    hold out the newest date for a head-to-head guard evaluation).
+    Returns metrics dict."""
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    ART.mkdir(exist_ok=True)
+    out_dir = pathlib.Path(out_dir)
+    out_dir.mkdir(exist_ok=True, parents=True)
     groups, y, dates = load_groups()
+    keep = ~np.isin(dates, list(exclude_dates))
+    groups = [g for g, k in zip(groups, keep) if k]
+    y, dates = y[keep], dates[keep]
     udates = sorted(set(dates.tolist()))
     cal_dates = udates[-2:]
     tr = np.flatnonzero(dates < cal_dates[0])
     va = np.flatnonzero(np.isin(dates, cal_dates))
-    print(f"{len(groups)} chunks | train {len(tr)} | calibration {len(va)} ({cal_dates})")
+    print(f"{len(groups)} chunks | train {len(tr)} | calibration {len(va)} ({cal_dates})"
+          + (f" | excluded {sorted(exclude_dates)}" if exclude_dates else ""))
 
     print("tokenizing…")
     tokens = [[tokenize_hand(h) for h in g] for g in groups]
@@ -108,7 +118,7 @@ def main():
     net_val = []
     for seed in SEEDS:
         model, vap = train_net(tokens, y, tr, va, seed, device)
-        torch.save(model.state_dict(), ART / f"transformer_s{seed}.pt")
+        torch.save(model.state_dict(), out_dir / f"transformer_s{seed}.pt")
         net_val.append(predict(model, [tokens[i] for i in va], device))
         print(f"seed {seed}: best val AP {vap:.4f}")
     net_val = np.mean(net_val, axis=0)
@@ -121,6 +131,8 @@ def main():
 
     blend_val = (rank01(net_val) + rank01(gbm_val)) / 2
     calibrator = FPRCalibrator(TARGET_FPR).fit(blend_val, y[va])
+    from sklearn.metrics import average_precision_score
+    cal_ap = float(average_precision_score(y[va], blend_val))
     joblib.dump({
         "gbm": gbm,
         "feature_names": feature_names,
@@ -128,12 +140,13 @@ def main():
         "max_pos_frac": MAX_POS_FRAC,
         "cal_dates": cal_dates,
         "train_dates": [d for d in udates if d < cal_dates[0]],
-    }, ART / "bundle.joblib")
+        "cal_ap": cal_ap,
+    }, out_dir / "bundle.joblib")
 
-    from sklearn.metrics import average_precision_score
-    print(f"calibration-set blend AP: {average_precision_score(y[va], blend_val):.4f}")
-    print(f"artifacts -> {ART}")
+    print(f"calibration-set blend AP: {cal_ap:.4f}")
+    print(f"artifacts -> {out_dir}")
+    return {"cal_ap": cal_ap, "cal_dates": cal_dates, "latest_date": udates[-1]}
 
 
 if __name__ == "__main__":
-    main()
+    build_artifacts()

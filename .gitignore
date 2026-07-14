@@ -4,3 +4,6 @@ artifacts/*.pt
 artifacts/*.joblib
 train/data/
 .venv/
+artifacts_staging/
+artifacts_backup/
+train/autopilot_log.jsonl
