@@ -1,0 +1,355 @@
+{
+ "statement": "Trained exclusively on the public Poker44 benchmark API (https://api.poker44.net/api/v1/benchmark). No validator-private data, no live labels, no other miners' artifacts.",
+ "releases": [
+  {
+   "sourceDate": "2026-07-14",
+   "releaseVersion": "v1.13",
+   "chunkCount": 19,
+   "handCount": 5000,
+   "sha256": "745df0247cf40ab1b554eee38bbcc05da63e0eea520dcebd6f59f2d824672146"
+  },
+  {
+   "sourceDate": "2026-07-13",
+   "releaseVersion": "v1.13",
+   "chunkCount": 19,
+   "handCount": 5000,
+   "sha256": "cbd8d1d98fa92bbe3827e0e08a91aa968dcf0ec57e5fb055be96d5008d131075"
+  },
+  {
+   "sourceDate": "2026-07-12",
+   "releaseVersion": "v1.13",
+   "chunkCount": 16,
+   "handCount": 5000,
+   "sha256": "1bc729bafec212fb17d3af7423eb5b662c3fc83741a9567bc9549f5627f30188"
+  },
+  {
+   "sourceDate": "2026-07-11",
+   "releaseVersion": "v1.13",
+   "chunkCount": 18,
+   "handCount": 5000,
+   "sha256": "b48104f6725476c35fd95eaed00d818eda3e00828d32f0a8c7afdabe083674c8"
+  },
+  {
+   "sourceDate": "2026-07-10",
+   "releaseVersion": "v1.13",
+   "chunkCount": 17,
+   "handCount": 5000,
+   "sha256": "81e206608014d184a786cb0232e9824e5f98a284056d535db119ff3990422f14"
+  },
+  {
+   "sourceDate": "2026-07-09",
+   "releaseVersion": "v1.13",
+   "chunkCount": 19,
+   "handCount": 5000,
+   "sha256": "c65c360aa0134bf31257d5a12c21c3f273bf90ec0e36de6deb6b054d8d2b0881"
+  },
+  {
+   "sourceDate": "2026-07-08",
+   "releaseVersion": "v1.13",
+   "chunkCount": 20,
+   "handCount": 5000,
+   "sha256": "08035187b6b1451b90be70e8ad31b319719e475b68fc2bb5463926d68c6167e4"
+  },
+  {
+   "sourceDate": "2026-07-07",
+   "releaseVersion": "v1.13",
+   "chunkCount": 21,
+   "handCount": 5000,
+   "sha256": "d4cc085dd0cb900564d70a6c9af5dc1852fd147781749746b51aaeff37e613d9"
+  },
+  {
+   "sourceDate": "2026-07-06",
+   "releaseVersion": "v1.13",
+   "chunkCount": 18,
+   "handCount": 5000,
+   "sha256": "41c6f625fb41e6e57b33a99eb56b667cc8ef1766481a642f915051d4b0d4bd11"
+  },
+  {
+   "sourceDate": "2026-07-05",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "2b980bc9d61d306502f16971fc1895445bbe1549ef37e53c6092e2884f56b668"
+  },
+  {
+   "sourceDate": "2026-07-04",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "777b90e51f7be09bf350d0490d77751df43742da89c9bad006aa4c389087d8c0"
+  },
+  {
+   "sourceDate": "2026-07-03",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "2c4c9406a15a7b5e5916b6e3be8126e2ed231aea87c7aa1ce9605a0a7d777956"
+  },
+  {
+   "sourceDate": "2026-07-02",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "8eeb02f57a48bba6f6b53f62735159824df4bc34d7a804eaad18dbdc06261b38"
+  },
+  {
+   "sourceDate": "2026-07-01",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "cb44f9e631c4b5ddedd68e0e039056849fd844d95a00b83b677fbf85939778af"
+  },
+  {
+   "sourceDate": "2026-06-30",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "6ff6119ecda2424dbdce2495723d19764b1a657ddbe374628fb4bfdccf895f69"
+  },
+  {
+   "sourceDate": "2026-06-29",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "aca16aa3fe2c826b0182ffd8d25bf5fce4320ee09b3bd3350dfe39671bd757f2"
+  },
+  {
+   "sourceDate": "2026-06-28",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "61583ab0a9042a64f43ffa09a08c306bf2ad4c4efe62cb403525811eeee3795b"
+  },
+  {
+   "sourceDate": "2026-06-27",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "ce24649b2ca7a10bea4b13453b9f673f4f92e2f7f3d04054a0c821340c0932a4"
+  },
+  {
+   "sourceDate": "2026-06-26",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "56109325398dcea2475135027cd19cef682ce01ea7608bd6b089cd2d4fab4352"
+  },
+  {
+   "sourceDate": "2026-06-25",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "4c097e0c168822d35a4c1b5680b6ace3bdc53a3ab495c15d0b54d2f0f5cfb8f6"
+  },
+  {
+   "sourceDate": "2026-06-24",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "03422d0698c22ae082c394be8ee01ed34a9b85a5e469282ef3a6a3b9fd4a2b50"
+  },
+  {
+   "sourceDate": "2026-06-23",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "013df2b557d7b6e983429bc4005b9bbc7f4371f35f86000cacb0368e7f49cd87"
+  },
+  {
+   "sourceDate": "2026-06-22",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "69c0dce54f8813603972033dba066f33294ad2371cb6076ff1edbb864e20082f"
+  },
+  {
+   "sourceDate": "2026-06-21",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "a45be62a97bd6b6c0e5d3992106601a3baffacd998c569241cf797e12ba76dd8"
+  },
+  {
+   "sourceDate": "2026-06-20",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "30b80f5222912809b54c7a9d08e5329ba0ab41cee0364ede355b6b5ebcd9d6d8"
+  },
+  {
+   "sourceDate": "2026-06-19",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "0c38f0078b498abcf4ab642396aeaf3278f22579f098049f7f31497174bf33ba"
+  },
+  {
+   "sourceDate": "2026-06-18",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "e65c9a81855e032593ab7929f7c2ac3d6a0afaa2a220594a5aaf8d0d03b4e93d"
+  },
+  {
+   "sourceDate": "2026-06-17",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "57dce2e1700ee280b635a335212d2e569813fad3b8322a5ac5642db504a7f01d"
+  },
+  {
+   "sourceDate": "2026-06-16",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "e4fe46adc5fe0d48981a1aafc73bc67318ffc431cda0699cdb1948bb0dca17bc"
+  },
+  {
+   "sourceDate": "2026-06-15",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "6677050145f8df39a69dc4992729ad38da6a43564a740ad458b048864f72c781"
+  },
+  {
+   "sourceDate": "2026-06-14",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "e96dac6bffdcdd7c9655fc4db7042ef7b98507337e87535902e40d91802da40f"
+  },
+  {
+   "sourceDate": "2026-06-13",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "e9cfe3bc2ea540f787fc50e0fcdd6976cd682f23f6cd528fd32bb0267f2517e6"
+  },
+  {
+   "sourceDate": "2026-06-12",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "74f45e907749869e5ee88ce362b9c625102eaad87e72493f0b3da3bfd28f1e57"
+  },
+  {
+   "sourceDate": "2026-06-11",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "d99b7e693d2f7f5b80d16a757c458aa6a0447d7ae5a91ad63015cf90cddc120d"
+  },
+  {
+   "sourceDate": "2026-06-10",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "4abd43f0d9e5a3e7ac3a52dedd358016b178c9b412719ad4b9d848c014b1f1da"
+  },
+  {
+   "sourceDate": "2026-06-09",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "01037d8704f9ca0ff2f16f73101b7aadb875eeb6fe2181ac42721bbdd90cdad0"
+  },
+  {
+   "sourceDate": "2026-06-08",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "712ddc6d260b4492c236b80ddbcb66286369985332ecb0b127338b3b6a349e7b"
+  },
+  {
+   "sourceDate": "2026-06-07",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "52b0af6bd06070939e56f155a9e2cc560b2312f676dcc69919f3dc2258eb6586"
+  },
+  {
+   "sourceDate": "2026-06-06",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "c442128f5dfd8f3d50252710ddadcc64d7825140c57cff6a097c5715fb303609"
+  },
+  {
+   "sourceDate": "2026-06-05",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "d71f3ffbb315b4e85e8cb3aaf137a516dd2df6e5d97c968bed23cc9552c5274b"
+  },
+  {
+   "sourceDate": "2026-06-04",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "8c92f17c00a9bba8056d2aefd43e7411861eec4c4d98c0d34de4f2c468ce8310"
+  },
+  {
+   "sourceDate": "2026-06-03",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "2660844a21d27cfc61fb1f828d2216d70050022491b46d1498f5f2ec65e1a4ec"
+  },
+  {
+   "sourceDate": "2026-06-02",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "fbb0d7657548cc22830c983ffd90c3835368a45a9540ceb255b4039775af7fe5"
+  },
+  {
+   "sourceDate": "2026-06-01",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "772f2da68527d823085d3210165ea22476364f6de698c3be142c22400c736db1"
+  },
+  {
+   "sourceDate": "2026-05-31",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "03aa9d3f3e9e31b8a434d8679ab127c369396582504af7c982fffeac64d004b0"
+  },
+  {
+   "sourceDate": "2026-05-30",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "157b464766b256236e3fee91904a3835d670a782080c4012dec0514c7ba547a2"
+  },
+  {
+   "sourceDate": "2026-05-29",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "e8435b1f4410770485376534a36bce2a793e496eae81158c048f894710a49d97"
+  },
+  {
+   "sourceDate": "2026-05-28",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "e8b2359789b365330b7e544507d272e4e685888a651c33bca49993da0ac9c672"
+  },
+  {
+   "sourceDate": "2026-05-27",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "e7e0360c1b9570bbe8dc425220ae68ac664a3bcd387f665db0428f6541677290"
+  },
+  {
+   "sourceDate": "2026-05-26",
+   "releaseVersion": "v1.12",
+   "chunkCount": 2,
+   "handCount": 480,
+   "sha256": "8229671e03189ffca241d5c71c69aa50a8847ab1415d1d259bdbcefa50959782"
+  }
+ ]
+}

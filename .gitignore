@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+artifacts/*.pt
+artifacts/*.joblib
+train/data/
+.venv/

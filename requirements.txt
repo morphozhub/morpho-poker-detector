@@ -1,0 +1,8 @@
+numpy>=1.24
+scipy>=1.10
+scikit-learn>=1.3
+joblib>=1.3
+torch>=2.1
+requests>=2.31
+bittensor
+poker44 @ git+https://github.com/Poker44/Poker44-subnet
