@@ -22,6 +22,17 @@ from morphodetect.serving import Detector
 
 MODEL_NAME = "morpho-poker-detector"
 MODEL_VERSION = "1.0"
+
+
+def _git_commit(repo_root: pathlib.Path) -> str:
+    import subprocess
+    try:
+        return subprocess.run(
+            ["git", "-C", str(repo_root), "rev-parse", "HEAD"],
+            capture_output=True, text=True, timeout=10, check=True,
+        ).stdout.strip()
+    except Exception:
+        return ""
 IMPLEMENTATION_FILES = [
     REPO_ROOT / "morphodetect" / "features.py",
     REPO_ROOT / "morphodetect" / "net.py",
@@ -46,6 +57,7 @@ class Miner(BaseMinerNeuron):
                 "framework": "pytorch+sklearn",
                 "license": "MIT",
                 "repo_url": "https://github.com/morphozhub/morpho-poker-detector",
+                "repo_commit": _git_commit(REPO_ROOT),
                 "open_source": True,
                 "inference_mode": "remote",
                 "training_data_statement": (
