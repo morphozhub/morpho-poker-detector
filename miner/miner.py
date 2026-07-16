@@ -55,27 +55,34 @@ IMPLEMENTATION_FILES = [
 
 
 class Miner(BaseMinerNeuron):
+    # Custom argparse args the subnet defines; bittensor >= 10.5 drops these
+    # from the config (only its own logging/wallet/subtensor/axon survive),
+    # leaving config.netuid / config.neuron / config.blacklist == None and
+    # crashing startup (e.g. metagraph(None) traps the chain runtime).
+    _CUSTOM_TOP = {"netuid"}
+    _CUSTOM_PREFIX = ("neuron.", "blacklist.", "miner.")
+
     @classmethod
     def check_config(cls, config):
-        # bittensor >= 10.5 stopped nesting the subnet's custom dotted args
-        # (--neuron.*) into the config, leaving config.neuron == None and
-        # breaking startup. Rebuild the neuron namespace from the subnet's own
-        # parser defaults. Safe on older bittensor too (only fills gaps).
         import argparse
-        from poker44.utils import config as _cfgmod
-        neuron = getattr(config, "neuron", None)
-        if neuron is None or getattr(neuron, "name", None) is None:
-            parser = argparse.ArgumentParser()
-            _cfgmod.add_args(cls, parser)
-            ns, _ = parser.parse_known_args(sys.argv[1:])
-            if neuron is None:
-                neuron = bt.Config()
-            for key, value in vars(ns).items():
-                if key.startswith("neuron.") and getattr(neuron, key[7:], None) is None:
-                    setattr(neuron, key[7:], value)
-            if not getattr(neuron, "name", None):
-                neuron.name = MODEL_NAME
-            config.neuron = neuron
+        parser = argparse.ArgumentParser()
+        cls.add_args(parser)
+        parsed = vars(parser.parse_known_args(sys.argv[1:])[0])
+        for dotted, value in parsed.items():
+            if dotted not in cls._CUSTOM_TOP and not dotted.startswith(cls._CUSTOM_PREFIX):
+                continue
+            parts = dotted.split(".")
+            node = config
+            for part in parts[:-1]:
+                child = getattr(node, part, None)
+                if child is None:
+                    child = bt.Config()
+                    setattr(node, part, child)
+                node = child
+            if getattr(node, parts[-1], None) is None:
+                setattr(node, parts[-1], value)
+        if getattr(getattr(config, "neuron", None), "name", None) is None:
+            config.neuron.name = MODEL_NAME
         return super().check_config(config)
 
     def __init__(self, config=None):
