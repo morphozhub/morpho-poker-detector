@@ -2,6 +2,20 @@
  "statement": "Trained exclusively on the public Poker44 benchmark API (https://api.poker44.net/api/v1/benchmark). No validator-private data, no live labels, no other miners' artifacts.",
  "releases": [
   {
+   "sourceDate": "2026-07-16",
+   "releaseVersion": "v1.13",
+   "chunkCount": 19,
+   "handCount": 5000,
+   "sha256": "8cdbba512f6203d394460b86a304db55b13e0807bca525c7f46c9884cbacb7ca"
+  },
+  {
+   "sourceDate": "2026-07-15",
+   "releaseVersion": "v1.13",
+   "chunkCount": 18,
+   "handCount": 5000,
+   "sha256": "c03ebbad48eb08f81e86259a710adec11c577a6b01c71d9d7227d7dc4a2b78be"
+  },
+  {
    "sourceDate": "2026-07-14",
    "releaseVersion": "v1.13",
    "chunkCount": 19,

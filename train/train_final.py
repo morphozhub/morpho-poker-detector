@@ -19,9 +19,15 @@ from morphodetect.calibration import FPRCalibrator, rank01
 from morphodetect.features import chunk_features_v2
 from morphodetect.net import ChunkNet, collate, predict, tokenize_hand
 
+import os
+
 DATA = pathlib.Path(__file__).parent / "data"
 ART = ROOT / "artifacts"
-SEEDS = (42, 7)
+# Seeds/epochs are overridable via env so the nightly autopilot can run a
+# lighter single-seed pass on CPU-only boxes where the GPU is unavailable.
+SEEDS = tuple(int(s) for s in os.getenv("P44_SEEDS", "42,7").split(",") if s.strip())
+EPOCHS = int(os.getenv("P44_EPOCHS", "50"))
+PATIENCE = int(os.getenv("P44_PATIENCE", "8"))
 TARGET_FPR = 0.04
 MAX_POS_FRAC = 0.25
 
@@ -49,7 +55,7 @@ def augment_chunk(chunk, pool, rng):
     return hands
 
 
-def train_net(tokens, y, tr, va, seed, device, epochs=50, patience=8, bs=24):
+def train_net(tokens, y, tr, va, seed, device, epochs=EPOCHS, patience=PATIENCE, bs=24):
     from sklearn.metrics import average_precision_score
     torch.manual_seed(seed); rng = random.Random(seed)
     model = ChunkNet().to(device)
