@@ -7,3 +7,7 @@ train/data/
 artifacts_staging/
 artifacts_backup/
 train/autopilot_log.jsonl
+train/autopilot.py
+train/autopilot_cron.log
+train/data
+ops/
