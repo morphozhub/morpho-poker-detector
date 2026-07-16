@@ -6,12 +6,19 @@ Outputs to artifacts/: transformer_s{42,7}.pt + bundle.joblib.
 
 Reproduce: python train/fetch_data.py && python train/train_final.py
 """
-import json, pathlib, random, sys
+import json, os, pathlib, random, sys
 
 import joblib
 import numpy as np
 import torch
 import torch.nn as nn
+
+# Cap CPU threads so a nightly CPU retrain doesn't saturate the box and starve
+# the live serving miner sharing it (which must answer validators within the
+# nonce window). Only applied when P44_TORCH_THREADS is set (the autopilot cron).
+_torch_threads = os.getenv("P44_TORCH_THREADS")
+if _torch_threads:
+    torch.set_num_threads(int(_torch_threads))
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
