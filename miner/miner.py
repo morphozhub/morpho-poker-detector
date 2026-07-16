@@ -55,6 +55,29 @@ IMPLEMENTATION_FILES = [
 
 
 class Miner(BaseMinerNeuron):
+    @classmethod
+    def check_config(cls, config):
+        # bittensor >= 10.5 stopped nesting the subnet's custom dotted args
+        # (--neuron.*) into the config, leaving config.neuron == None and
+        # breaking startup. Rebuild the neuron namespace from the subnet's own
+        # parser defaults. Safe on older bittensor too (only fills gaps).
+        import argparse
+        from poker44.utils import config as _cfgmod
+        neuron = getattr(config, "neuron", None)
+        if neuron is None or getattr(neuron, "name", None) is None:
+            parser = argparse.ArgumentParser()
+            _cfgmod.add_args(cls, parser)
+            ns, _ = parser.parse_known_args(sys.argv[1:])
+            if neuron is None:
+                neuron = bt.Config()
+            for key, value in vars(ns).items():
+                if key.startswith("neuron.") and getattr(neuron, key[7:], None) is None:
+                    setattr(neuron, key[7:], value)
+            if not getattr(neuron, "name", None):
+                neuron.name = MODEL_NAME
+            config.neuron = neuron
+        return super().check_config(config)
+
     def __init__(self, config=None):
         super().__init__(config=config)
         self.detector = Detector()
