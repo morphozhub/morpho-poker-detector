@@ -55,22 +55,17 @@ IMPLEMENTATION_FILES = [
 
 
 class Miner(BaseMinerNeuron):
-    # Custom argparse args the subnet defines; bittensor >= 10.5 drops these
-    # from the config (only its own logging/wallet/subtensor/axon survive),
-    # leaving config.netuid / config.neuron / config.blacklist == None and
-    # crashing startup (e.g. metagraph(None) traps the chain runtime).
-    _CUSTOM_TOP = {"netuid"}
-    _CUSTOM_PREFIX = ("neuron.", "blacklist.", "miner.")
-
     @classmethod
     def check_config(cls, config):
+        # bittensor >= 10.5's bt.Config(parser=parser) ignores sys.argv and
+        # returns only argparse defaults (wallet=default, axon.port=8091,
+        # netuid=None, neuron/blacklist=None) — which crashes startup
+        # (metagraph(None) traps the chain runtime; wrong wallet; wrong port).
+        # Rebuild the whole config from argparse so CLI values are honored.
         import argparse
         parser = argparse.ArgumentParser()
         cls.add_args(parser)
-        parsed = vars(parser.parse_known_args(sys.argv[1:])[0])
-        for dotted, value in parsed.items():
-            if dotted not in cls._CUSTOM_TOP and not dotted.startswith(cls._CUSTOM_PREFIX):
-                continue
+        for dotted, value in vars(parser.parse_known_args(sys.argv[1:])[0]).items():
             parts = dotted.split(".")
             node = config
             for part in parts[:-1]:
@@ -79,8 +74,7 @@ class Miner(BaseMinerNeuron):
                     child = bt.Config()
                     setattr(node, part, child)
                 node = child
-            if getattr(node, parts[-1], None) is None:
-                setattr(node, parts[-1], value)
+            setattr(node, parts[-1], value)
         if getattr(getattr(config, "neuron", None), "name", None) is None:
             config.neuron.name = MODEL_NAME
         return super().check_config(config)
