@@ -1,11 +1,23 @@
 """Production Poker44 miner serving the morpho-poker-detector ensemble."""
 import hashlib
+import os
 import pathlib
 import sys
 import time
 from typing import Tuple
 
 import bittensor as bt
+
+# Widen the axon nonce freshness window so validators whose clocks are skewed
+# (observed ~79s behind on some) aren't rejected with "Nonce is too old",
+# which would silently cost us their scoring. Replay safety is preserved by the
+# separate monotonic-nonce check; this only affects the freshness delta.
+_nonce_window_s = float(os.getenv("P44_NONCE_WINDOW_SECONDS", "120"))
+try:
+    import bittensor.utils.axon_utils as _axon_utils
+    _axon_utils.ALLOWED_DELTA = int(_nonce_window_s * 1_000_000_000)
+except Exception:  # pragma: no cover - keep miner up even if internals move
+    pass
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
