@@ -52,3 +52,21 @@ def batch_guard(scores, min_pos=1, max_frac=0.25):
 def rank01(p):
     from scipy.stats import rankdata
     return (rankdata(p) - 0.5) / len(p)
+
+
+def batch_rank(X):
+    """Column-wise within-batch rank in [0,1] for a chunk feature matrix.
+
+    Makes features scale/mean-shift invariant: the benchmark (6-max, big pots)
+    and live (9-max, tiny pots) distributions map to the same uniform ranks, so
+    a benchmark-trained model operates in-distribution on live batches.
+    """
+    from scipy.stats import rankdata
+    X = np.asarray(X, dtype=np.float64)
+    if X.shape[0] < 2:
+        return np.full_like(X, 0.5)
+    R = np.empty_like(X)
+    n = X.shape[0]
+    for j in range(X.shape[1]):
+        R[:, j] = (rankdata(X[:, j], method="average") - 0.5) / n
+    return R

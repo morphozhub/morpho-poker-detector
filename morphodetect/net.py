@@ -30,8 +30,10 @@ def tokenize_hand(hand):
         amt_b = int(np.searchsorted(BUCKETS, amt, side="right"))
         pot_bb = max(0.0, float(a.get("pot_before") or 0.0) / BB)
         pot_b = min(N_POT - 1, int(math.log2(pot_bb + 1.0)) + 1) if pot_bb > 0 else 0
-        seat = a.get("actor_seat")
-        seat = seat if isinstance(seat, int) and 0 <= seat <= 6 else 7
+        # Absolute seat is not transferable (live is 9-max, the validator
+        # reseats players, and benchmark seat 7-9 embeddings are untrained) —
+        # neutralize it and rely on action sequences + the hero flag.
+        seat = 0
         rows.append((street, atype, is_hero, amt_b, pot_b, seat))
     if not rows:
         rows = [(4, 8, 0, 0, 0, 7)]

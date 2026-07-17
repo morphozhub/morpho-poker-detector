@@ -124,9 +124,18 @@ def build_artifacts(out_dir=ART, exclude_dates=()):
     print("tokenizing…")
     tokens = [[tokenize_hand(h) for h in g] for g in groups]
     print("featurizing…")
+    from morphodetect.calibration import batch_rank
     rows = [chunk_features_v2(g) for g in groups]
     feature_names = sorted(rows[0].keys())
     X = np.array([[r.get(k, 0.0) for k in feature_names] for r in rows], dtype=np.float32)
+    # OOD-robust: rank features WITHIN each date-batch (mirrors serving, which
+    # ranks within the validator's request batch) so absolute scale/mean shifts
+    # between benchmark and live don't matter.
+    Xr = np.empty_like(X, dtype=np.float64)
+    for d in np.unique(dates):
+        m = dates == d
+        Xr[m] = batch_rank(X[m])
+    X = Xr.astype(np.float32)
 
     net_val = []
     for seed in SEEDS:
@@ -151,6 +160,7 @@ def build_artifacts(out_dir=ART, exclude_dates=()):
         "feature_names": feature_names,
         "calibrator": calibrator,
         "max_pos_frac": MAX_POS_FRAC,
+        "batch_rank_gbm": True,
         "cal_dates": cal_dates,
         "train_dates": [d for d in udates if d < cal_dates[0]],
         "cal_ap": cal_ap,

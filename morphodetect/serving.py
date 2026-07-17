@@ -6,7 +6,7 @@ import joblib
 import numpy as np
 import torch
 
-from .calibration import batch_guard, rank01
+from .calibration import batch_guard, batch_rank, rank01
 from .features import chunk_features_v2
 from .net import ChunkNet, predict, tokenize_hand
 
@@ -22,6 +22,7 @@ class Detector:
         self.feature_names = bundle["feature_names"]
         self.calibrator = bundle["calibrator"]
         self.max_pos_frac = bundle.get("max_pos_frac", 0.25)
+        self.batch_rank_gbm = bundle.get("batch_rank_gbm", False)
         self.nets = []
         for f in sorted(artifacts_dir.glob("transformer_s*.pt")):
             net = ChunkNet()
@@ -35,6 +36,8 @@ class Detector:
         rows = [chunk_features_v2(c) for c in chunks]
         X = np.array([[r.get(k, 0.0) for k in self.feature_names] for r in rows],
                      dtype=np.float32)
+        if self.batch_rank_gbm and len(chunks) > 1:
+            X = batch_rank(X)
         return self.gbm.predict_proba(X)[:, 1]
 
     def _net_probs(self, chunks):

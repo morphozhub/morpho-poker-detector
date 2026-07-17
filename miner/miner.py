@@ -112,10 +112,11 @@ class Miner(BaseMinerNeuron):
                     "data_attestation.json (sha256 per benchmark release) in the repo root."
                 ),
                 "notes": (
-                    "Rank-blend of a hierarchical action-sequence transformer (2 seeds) "
-                    "and a HistGradientBoosting model on 206 sanitize-invariant chunk "
-                    "features, with monotonic FPR calibration and a rank-preserving "
-                    "batch positive budget. Full training code in train/."
+                    "Rank-blend of a hierarchical action-sequence transformer (2 seeds, "
+                    "seat-invariant) and a HistGradientBoosting model on within-batch "
+                    "rank-normalized chunk features, with monotonic FPR calibration and "
+                    "a rank-preserving batch positive budget. Within-batch ranking makes "
+                    "features robust to table/scale shifts. Full training code in train/."
                 ),
             },
         )
