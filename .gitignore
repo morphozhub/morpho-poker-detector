@@ -11,3 +11,4 @@ train/autopilot.py
 train/autopilot_cron.log
 train/data
 ops/
+tools/

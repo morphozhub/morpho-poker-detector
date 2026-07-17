@@ -1,5 +1,6 @@
 """Production Poker44 miner serving the morpho-poker-detector ensemble."""
 import hashlib
+import json
 import os
 import pathlib
 import sys
@@ -124,6 +125,43 @@ class Miner(BaseMinerNeuron):
             f"(missing={self.manifest_compliance['missing_fields']}) "
             f"digest={manifest_digest(self.model_manifest)}"
         )
+        # Optional live-capture for OOD diagnostics (no labels — data + our scores only).
+        self._capture_dir = os.getenv("P44_CAPTURE_DIR", "").strip()
+        self._capture_seen: set = set()
+        if self._capture_dir:
+            pathlib.Path(self._capture_dir).mkdir(parents=True, exist_ok=True)
+            cap_file = pathlib.Path(self._capture_dir) / "captured.jsonl"
+            if cap_file.exists():
+                for line in cap_file.read_text().splitlines():
+                    try:
+                        self._capture_seen.add(json.loads(line)["fp"])
+                    except Exception:
+                        pass
+            bt.logging.info(
+                f"Live-capture ON → {cap_file} ({len(self._capture_seen)} unique snapshots seen)"
+            )
+
+    def _capture(self, chunks, scores):
+        if not self._capture_dir:
+            return
+        try:
+            payload = json.dumps(chunks, sort_keys=True, default=str)
+            fp = hashlib.sha256(payload.encode()).hexdigest()[:16]
+            if fp in self._capture_seen:
+                return
+            self._capture_seen.add(fp)
+            rec = {
+                "fp": fp,
+                "n_chunks": len(chunks),
+                "chunk_sizes": [len(c) for c in chunks],
+                "scores": [round(float(s), 6) for s in scores],
+                "chunks": chunks,
+            }
+            with (pathlib.Path(self._capture_dir) / "captured.jsonl").open("a") as f:
+                f.write(json.dumps(rec, default=str) + "\n")
+            bt.logging.info(f"Live-capture: new snapshot {fp} ({len(chunks)} chunks) stored")
+        except Exception as exc:
+            bt.logging.warning(f"Live-capture failed: {exc}")
 
     async def forward(self, synapse: DetectionSynapse) -> DetectionSynapse:
         chunks = synapse.chunks or []
@@ -136,6 +174,7 @@ class Miner(BaseMinerNeuron):
         synapse.risk_scores = scores
         synapse.predictions = [s >= 0.5 for s in scores]
         synapse.model_manifest = dict(self.model_manifest)
+        self._capture(chunks, scores)
         bt.logging.info(
             f"Scored {len(chunks)} chunks "
             f"({sum(len(c) for c in chunks)} hands) in {time.monotonic() - started:.2f}s"
