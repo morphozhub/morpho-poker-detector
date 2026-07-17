@@ -150,10 +150,15 @@ class Miner(BaseMinerNeuron):
 
 
 if __name__ == "__main__":
-    with Miner() as miner:
-        bt.logging.info("morpho-poker-detector miner running")
-        while True:
-            bt.logging.info(
-                f"UID {miner.uid} | incentive {miner.metagraph.I[miner.uid]:.6f}"
-            )
-            time.sleep(300)
+    try:
+        with Miner() as miner:
+            bt.logging.info("morpho-poker-detector miner running")
+            while True:
+                bt.logging.info(
+                    f"UID {miner.uid} | incentive {miner.metagraph.I[miner.uid]:.6f}"
+                )
+                time.sleep(300)
+    except KeyboardInterrupt:
+        # Clean exit on pm2 restart/stop (e.g. the nightly autopilot redeploy),
+        # so it doesn't surface as an error traceback.
+        bt.logging.info("morpho-poker-detector miner stopping (signal received)")
