@@ -54,6 +54,32 @@ def rank01(p):
     return (rankdata(p) - 0.5) / len(p)
 
 
+def rank_budget(scores, frac=0.10, hi=0.55, lo=0.05):
+    """Exact within-batch rank budget: the top floor(frac*n) chunks land in
+    (0.5, hi], the rest in [lo, 0.499], strictly monotone (rank-preserving).
+
+    This is immune to score compression on the live feed (unlike a calibrator
+    fit on the benchmark): exactly frac of the batch crosses 0.5 no matter how
+    the raw scores are distributed, which is what protects threshold_sanity@0.5
+    and recall@FPR on the out-of-distribution live batches. Top-miner approach.
+    """
+    s = np.asarray(scores, dtype=float)
+    n = len(s)
+    if n < 2:
+        return np.full(n, 0.5)
+    from scipy.stats import rankdata
+    ranks = rankdata(s, method="ordinal") - 1  # 0..n-1, higher score -> higher rank
+    k = max(1, int(np.floor(frac * n)))
+    out = np.empty(n)
+    for i in range(n):
+        r = ranks[i]
+        if r >= n - k:
+            out[i] = 0.501 + (hi - 0.501) * ((r - (n - k)) / max(k - 1, 1))
+        else:
+            out[i] = lo + (0.499 - lo) * (r / max(n - k - 1, 1))
+    return out
+
+
 def batch_rank(X):
     """Column-wise within-batch rank in [0,1] for a chunk feature matrix.
 

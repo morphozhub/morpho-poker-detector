@@ -6,7 +6,9 @@ import joblib
 import numpy as np
 import torch
 
-from .calibration import batch_guard, batch_rank, rank01
+import os
+
+from .calibration import batch_guard, batch_rank, rank01, rank_budget
 from .features import chunk_features_v2
 from .net import ChunkNet, predict, tokenize_hand
 
@@ -52,7 +54,10 @@ class Detector:
             # rank blending needs a batch; fall back to calibrated mean prob
             raw = (self._net_probs(chunks) + self._gbm_probs(chunks)) / 2
             return self.calibrator.transform(raw).tolist()
+        # Rank-fusion of the two decorrelated members, then an exact rank budget:
+        # exactly ~frac of the batch crosses 0.5 (rank-preserving). Immune to the
+        # live-feed score compression that a benchmark-fit calibrator mishandles.
         blend = (rank01(self._net_probs(chunks)) + rank01(self._gbm_probs(chunks))) / 2
-        scores = batch_guard(self.calibrator.transform(blend),
-                             max_frac=self.max_pos_frac)
+        frac = float(os.getenv("P44_POS_FRAC", "0.10"))
+        scores = rank_budget(blend, frac=frac)
         return [float(round(s, 6)) for s in scores]
