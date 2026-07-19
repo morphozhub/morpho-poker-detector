@@ -48,7 +48,6 @@ def _git_commit(repo_root: pathlib.Path) -> str:
         return ""
 IMPLEMENTATION_FILES = [
     REPO_ROOT / "morphodetect" / "features.py",
-    REPO_ROOT / "morphodetect" / "net.py",
     REPO_ROOT / "morphodetect" / "calibration.py",
     REPO_ROOT / "morphodetect" / "serving.py",
     pathlib.Path(__file__).resolve(),
@@ -91,7 +90,7 @@ class Miner(BaseMinerNeuron):
             defaults={
                 "model_name": MODEL_NAME,
                 "model_version": MODEL_VERSION,
-                "framework": "pytorch+sklearn",
+                "framework": "sklearn",
                 "license": "MIT",
                 "repo_url": "https://github.com/morphozhub/morpho-poker-detector",
                 "repo_commit": _git_commit(REPO_ROOT),
@@ -112,11 +111,12 @@ class Miner(BaseMinerNeuron):
                     "data_attestation.json (sha256 per benchmark release) in the repo root."
                 ),
                 "notes": (
-                    "Rank-blend of a hierarchical action-sequence transformer (2 seeds, "
-                    "seat-invariant) and a HistGradientBoosting model on within-batch "
-                    "rank-normalized chunk features, with monotonic FPR calibration and "
-                    "a rank-preserving batch positive budget. Within-batch ranking makes "
-                    "features robust to table/scale shifts. Full training code in train/."
+                    "Heterogeneous tree-stack (LightGBM/XGBoost/CatBoost/ExtraTrees/"
+                    "RandomForest -> logistic meta) on within-batch rank-normalized "
+                    "sanitize-invariant chunk features, trained with domain-randomization "
+                    "augmentation, with an exact rank-budget output (top ~10% of the batch "
+                    "cross 0.5, rank-preserving). Within-batch ranking + rank-budget make "
+                    "it robust to the live table/scale shift. Full training code in train/."
                 ),
             },
         )
