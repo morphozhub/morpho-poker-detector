@@ -6,3 +6,6 @@ torch>=2.1
 requests>=2.31
 bittensor
 poker44 @ git+https://github.com/Poker44/Poker44-subnet
+lightgbm>=4.0
+xgboost>=2.0
+catboost>=1.2
