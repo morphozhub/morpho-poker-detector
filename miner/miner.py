@@ -82,8 +82,8 @@ class Miner(BaseMinerNeuron):
     def __init__(self, config=None):
         super().__init__(config=config)
         self.detector = Detector()
-        bt.logging.info(f"Detector loaded on {self.detector.device} "
-                        f"({len(self.detector.nets)} transformer seeds + GBM)")
+        bt.logging.info(f"Detector loaded ({type(self.detector.model).__name__} "
+                        f"tree-stack on {self.detector.device})")
         self.model_manifest = build_local_model_manifest(
             repo_root=REPO_ROOT,
             implementation_files=IMPLEMENTATION_FILES,
