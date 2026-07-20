@@ -116,6 +116,44 @@ def hand_view(hand):
     return toks, rich, scal
 
 
+def _hand_response(hand):
+    """Reaction of each actor to facing a bet/raise, + per-hand aggression."""
+    hand = prepare_hand_for_miner(hand)
+    actions = hand.get("actions") or []
+    faced_bet = False
+    fold = call = raise_ = faced = aggr = passive = 0
+    for a in actions:
+        at = a.get("action_type")
+        if faced_bet and at in ("fold", "call", "raise"):
+            faced += 1
+            if at == "fold": fold += 1
+            elif at == "call": call += 1
+            else: raise_ += 1
+        if at in ("bet", "raise"):
+            faced_bet = True; aggr += 1
+        elif at in ("call", "check"):
+            passive += 1
+    f = max(faced, 1)
+    return {"resp_fold": fold / f, "resp_call": call / f, "resp_raise": raise_ / f,
+            "faced_aggr_rate": faced / max(len(actions), 1),
+            "aggr_factor": aggr / max(passive, 1)}
+
+
+def _norm_entropy(counter):
+    n = sum(counter.values())
+    if n <= 0:
+        return 0.0
+    ps = np.array([c / n for c in counter.values() if c > 0])
+    return float(-(ps * np.log(ps)).sum()) / math.log(max(len(counter), 2))
+
+
+def _lag1(x):
+    x = np.asarray(x, dtype=float)
+    if len(x) < 3 or np.std(x[:-1]) < 1e-9 or np.std(x[1:]) < 1e-9:
+        return 0.0
+    return float(np.corrcoef(x[:-1], x[1:])[0, 1])
+
+
 def chunk_features_v2(hands):
     views = [hand_view(h) for h in hands]
     feat = {}
@@ -167,4 +205,34 @@ def chunk_features_v2(hands):
         feat["jaccard_bigram"] = 0.0
     feat["hand_count"] = float(len(hands))
     feat["hand_count_log"] = math.log1p(len(hands))
+
+    # --- v3: richer discriminative signals for live 9-max ranking ---
+    resp = [_hand_response(h) for h in hands]
+    for k in ("resp_fold", "resp_call", "resp_raise", "faced_aggr_rate", "aggr_factor"):
+        vv = np.array([r[k] for r in resp], dtype=float)
+        feat[f"{k}_mean"] = float(vv.mean())
+        feat[f"{k}_std"] = float(vv.std())
+        feat[f"{k}_q90"] = float(np.quantile(vv, 0.9))
+    tri = Counter()
+    for v in views:
+        tri.update(zip(v[0], v[0][1:], v[0][2:]))
+    feat["uni_entropy"] = _norm_entropy(uni)
+    feat["bigram_entropy"] = _norm_entropy(big)
+    feat["trigram_entropy"] = _norm_entropy(tri)
+    feat["bigram_top_share"] = (big.most_common(1)[0][1] / max(sum(big.values()), 1)) if big else 0.0
+    feat["trigram_top_share"] = (tri.most_common(1)[0][1] / max(sum(tri.values()), 1)) if tri else 0.0
+    feat["bigram_uniq_ratio"] = len(big) / max(sum(big.values()), 1)
+    aggr_series = [r["aggr_factor"] for r in resp]
+    nact_series = [v[2].get("n_actions", 0.0) for v in views]
+    feat["aggr_lag1_autocorr"] = _lag1(aggr_series)
+    feat["nact_lag1_autocorr"] = _lag1(nact_series)
+    feat["aggr_cv"] = float(np.std(aggr_series) / (np.mean(aggr_series) + 1e-9))
+    utils = []
+    for h in hands:
+        hh = prepare_hand_for_miner(h)
+        md = hh.get("metadata") or {}
+        ms = float(md.get("max_seats") or 0) or len(hh.get("players") or []) or 6
+        utils.append(len(hh.get("players") or []) / max(ms, 1))
+    feat["seat_util_mean"] = float(np.mean(utils))
+    feat["seat_util_std"] = float(np.std(utils))
     return feat
