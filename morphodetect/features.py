@@ -17,6 +17,8 @@ BUCKETS = np.asarray(_VISIBLE_BB_BUCKETS, dtype=float)
 ACT_TYPES = ["small_blind", "big_blind", "ante", "check", "call", "bet", "raise", "fold"]
 STREETS = ["preflop", "flop", "turn", "river"]
 ORDER_STATS = ("mean", "std", "min", "max", "q10", "q50", "q90")
+# aggression ordinal for directional Markov transition dynamics
+_AGG_ORD = {"fold": 0, "check": 1, "call": 2, "bet": 3, "raise": 4, "all_in": 4}
 
 
 def _order_stats(v):
@@ -139,6 +141,26 @@ def _hand_response(hand):
             "aggr_factor": aggr / max(passive, 1)}
 
 
+def _hand_markov(hand):
+    """Directional action-transition dynamics within a hand: escalation vs
+    de-escalation, action repeats, fold-after-aggression. Pure action types
+    (portable — indices 0/last are always preserved by the sampler; only
+    the *direction* of consecutive transitions is used, no bb magnitudes)."""
+    hand = prepare_hand_for_miner(hand)
+    seq = [a.get("action_type") for a in (hand.get("actions") or [])]
+    esc = deesc = rep = fa = tr = 0
+    for a, b in zip(seq, seq[1:]):
+        oa, ob = _AGG_ORD.get(a), _AGG_ORD.get(b)
+        if oa is None or ob is None:
+            continue
+        tr += 1
+        esc += ob > oa; deesc += ob < oa; rep += a == b
+        fa += (oa >= 3 and b == "fold")
+    t = max(tr, 1)
+    return {"mk_esc": esc / t, "mk_deesc": deesc / t,
+            "mk_rep": rep / t, "mk_fold_aggr": fa / t}
+
+
 def _norm_entropy(counter):
     n = sum(counter.values())
     if n <= 0:
@@ -235,4 +257,13 @@ def chunk_features_v2(hands):
         utils.append(len(hh.get("players") or []) / max(ms, 1))
     feat["seat_util_mean"] = float(np.mean(utils))
     feat["seat_util_std"] = float(np.std(utils))
+
+    # --- v4: directional Markov transition dynamics (only class that improved
+    # live-transfer STRESS in per-class ablation; +0.0045..0.0106, no bench cost) ---
+    mk = [_hand_markov(h) for h in hands]
+    for k in ("mk_esc", "mk_deesc", "mk_rep", "mk_fold_aggr"):
+        vv = np.array([m[k] for m in mk], dtype=float)
+        feat[f"{k}_mean"] = float(vv.mean())
+        feat[f"{k}_std"] = float(vv.std())
+        feat[f"{k}_q90"] = float(np.quantile(vv, 0.9))
     return feat
