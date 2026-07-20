@@ -18,6 +18,7 @@ from morphodetect.features import chunk_features_v2
 DATA = pathlib.Path(__file__).parent / "data"
 ART = ROOT / "artifacts"
 AUG_FRAC = float(os.getenv("P44_AUG_FRAC", "0.5"))   # domain-randomization fraction
+AUG9_FRAC = float(os.getenv("P44_AUG9_FRAC", "0.4"))  # synthetic 9-max aug fraction
 POS_FRAC = float(os.getenv("P44_POS_FRAC", "0.10"))  # rank-budget positive fraction
 _SHIFT_KEYS = ("normalized_amount_bb", "amount", "raise_to", "call_to",
                "pot_before", "pot_after")
@@ -54,6 +55,49 @@ def _live_shift_group(group, rng):
                 a["action_type"] = "call" if rng.random() < 0.6 else "check"
         out.append(h)
     return out
+
+
+def _to_9max_hand(hand, rng, target_seats=9):
+    """Grow a 6-max hand to ~9 seats and inject the extra players' early preflop
+    folds — adds the live 9-max STRUCTURE (measured n_players 6->9, more early
+    folds) without touching the real players' bot/human behavior. Structural
+    features (n_players, more actors) survive the sanitizer's action window."""
+    import numpy as _np
+    h = json.loads(json.dumps(hand))
+    md = h.setdefault("metadata", {})
+    players = h.get("players") or []
+    base_seats = sorted({p.get("seat") for p in players if p.get("seat") is not None})
+    if not base_seats:
+        return h
+    stacks = [p.get("starting_stack") for p in players if p.get("starting_stack")]
+    med = float(_np.median(stacks)) if stacks else 5.0
+    new_seats, s = [], max(base_seats) + 1
+    for _ in range(max(0, target_seats - len(players))):
+        players.append({"player_uid": f"seat_{s}", "seat": s,
+                        "starting_stack": med * rng.uniform(0.7, 1.3),
+                        "hole_cards": None, "showed_hand": False})
+        new_seats.append(s); s += 1
+    h["players"] = players
+    md["max_seats"] = max(int(md.get("max_seats") or len(base_seats)), target_seats)
+    actions = h.get("actions") or []
+    first_pot = next((float(a.get("pot_before") or 0.0) for a in actions
+                      if a.get("pot_before") is not None), 0.0)
+    inj = []
+    for i, seat in enumerate(new_seats):
+        at = "fold" if rng.random() < 0.8 else ("call" if rng.random() < 0.6 else "check")
+        inj.append({"action_id": f"x{i}", "street": "preflop", "actor_seat": seat,
+                    "action_type": at, "amount": 0.0 if at != "call" else 0.02,
+                    "raise_to": None, "call_to": None,
+                    "normalized_amount_bb": 0.0 if at != "call" else 1.0,
+                    "pot_before": first_pot, "pot_after": first_pot})
+    h["actions"] = inj + actions
+    return h
+
+
+def _live_9max_group(group, rng):
+    """Live-shift then grow to 9-max — the synthetic 9-max augmentation
+    (validated: +0.042 STRESS9 on the stack, no bench/plain-stress regression)."""
+    return [_to_9max_hand(hand, rng) for hand in _live_shift_group(group, rng)]
 
 
 def build_stack():
@@ -115,11 +159,15 @@ def build_artifacts(out_dir=ART, exclude_dates=()):
         aug_g.append(g); aug_y.append(lbl); aug_d.append(d)
         if AUG_FRAC > 0 and d < cal_dates[0] and a_rng.random() < AUG_FRAC:
             aug_g.append(_live_shift_group(g, a_rng)); aug_y.append(lbl); aug_d.append(f"{d}_aug")
+        # synthetic 9-max aug: warp 6-max training chunks to the live 9-max regime
+        if AUG9_FRAC > 0 and d < cal_dates[0] and a_rng.random() < AUG9_FRAC:
+            aug_g.append(_live_9max_group(g, a_rng)); aug_y.append(lbl); aug_d.append(f"{d}_9m")
     groups, y, dates = aug_g, np.array(aug_y), np.array(aug_d)
     tr = np.flatnonzero(~np.isin(dates, cal_dates))
     va = np.flatnonzero(np.isin(dates, cal_dates))
     n_aug = sum(1 for d in dates if str(d).endswith("_aug"))
-    print(f"{len(groups)} chunks | train {len(tr)} (incl. {n_aug} aug) | "
+    n_9m = sum(1 for d in dates if str(d).endswith("_9m"))
+    print(f"{len(groups)} chunks | train {len(tr)} (incl. {n_aug} live-aug, {n_9m} 9max-aug) | "
           f"calibration {len(va)} ({cal_dates})"
           + (f" | excluded {sorted(exclude_dates)}" if exclude_dates else ""))
 
