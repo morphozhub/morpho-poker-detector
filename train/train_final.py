@@ -71,9 +71,10 @@ def build_stack():
     ]
     try:
         from lightgbm import LGBMClassifier
-        ests.append(("lgb", LGBMClassifier(n_estimators=500, num_leaves=48, learning_rate=0.05,
-                                           subsample=0.85, colsample_bytree=0.8,
-                                           random_state=4, verbose=-1)))
+        ests.append(("lgb", LGBMClassifier(n_estimators=400, num_leaves=101, learning_rate=0.0221,
+                                           subsample=0.697, colsample_bytree=0.529,
+                                           min_child_samples=34, reg_lambda=0.00824,
+                                           random_state=4, verbose=-1)))  # Optuna-tuned on stress
     except Exception:
         pass
     try:
