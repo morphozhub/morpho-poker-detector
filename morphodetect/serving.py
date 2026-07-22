@@ -37,13 +37,17 @@ class Detector:
         return self.model.predict_proba(X)[:, 1]
 
     def score_chunks(self, chunks):
-        """One bot-risk score in [0,1] per chunk."""
+        """One OPERATIONAL bot-risk probability in [0,1] per chunk.
+
+        The model (batch-rank-normalized tree-stack) already emits well-spread,
+        operational probabilities on the live feed (min~0.07, max~0.95, ~35%
+        cross 0.5). We return them directly. We deliberately do NOT compress
+        them into a narrow rank-budget band around 0.5: the subnet's runtime-431
+        validators (deploy 0.1.35) apply threshold-sanity/calibration checks that
+        penalize "a rank ordering compressed below the 0.5 threshold" (see
+        docs/miner.md), which is exactly what rank_budget did — it silently
+        collapsed our live composite from ~0.53 to ~0.10.
+        """
         chunks = [c if c else [{}] for c in chunks]
-        if len(chunks) == 1:
-            # no batch to rank against; return a neutral-ish single prob
-            return [float(np.clip(self._probs(chunks)[0], 0.0, 1.0))]
-        # Exact rank budget: exactly ~pos_frac of the batch crosses 0.5,
-        # rank-preserving. Immune to the live-feed score compression that a
-        # benchmark-fit calibrator mishandles.
-        scores = rank_budget(self._probs(chunks), frac=self.pos_frac)
-        return [float(round(s, 6)) for s in scores]
+        probs = self._probs(chunks)
+        return [float(np.clip(round(float(p), 6), 0.0, 1.0)) for p in probs]
